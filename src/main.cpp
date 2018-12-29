@@ -32,39 +32,41 @@ void loop() {
         if(digitalRead(button1) == HIGH){
             buttonState1 = true;
         }
-        else if(digitalRead(button2) == HIGH){
-            buttonState2 == true;
+        if(digitalRead(button2) == HIGH){
+            buttonState2 = true;
         }
-        else if(digitalRead(button3) == HIGH){
-            buttonState3 == true;
+        if(digitalRead(button3) == HIGH){
+            buttonState3 = true;
         }
-        else if(digitalRead(button4) == HIGH){
-            buttonState4 == true;
+        if(digitalRead(button4) == HIGH){
+            buttonState4 = true;
         }
 
         if(buttonState1 == true && digitalRead(button1) == LOW){
-            singleColor(int 0);  //hsv green
-            buttonState1 == false;
+            singleColor(120);  //hsv green
+            buttonState1 = false;
         }
-        else if(buttonState2 == true && digitalRead(button2) == LOW){
-            singleColor(int 0);  //hsv yellow
-            buttonState2 == false;
+        if(buttonState2 == true && digitalRead(button2) == LOW){
+            singleColor(60);  //hsv yellow
+            buttonState2 = false;
         }
-        else if(buttonState3 == true && digitalRead(button3) == LOW){
-            twoColorSpectrum(int 0, int 0);  //hsv red blue
-            buttonState3 == false;
+        if(buttonState3 == true && digitalRead(button3) == LOW){
+            twoColorSpectrum(0, 240);  //hsv red blue
+            buttonState3 = false;
         }
-        else if(buttonState4 == true && digitalRead(button4) == LOW){
-            twoColorSpectrum(int 0, int 0);  //hsv green blue
-            buttonState4 == false;
+        if(buttonState4 == true && digitalRead(button4) == LOW){
+            twoColorSpectrum(120, 240);  //hsv green blue
+            buttonState4 = false;
         }
     }
 }
 
 void singleColor(int color){
     //send mode and color
+    Serial.println(color);
 }
 
 void twoColorSpectrum(int color1, int color2){
     //send mode and two colors
+    Serial.println(color1);
 }
