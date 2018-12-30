@@ -45,6 +45,8 @@ void setup() {
                       0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
     rf69.setEncryptionKey(key);
 
+    pinMode(LED, OUTPUT);
+
     pinMode(button1, INPUT);
     pinMode(button2, INPUT);
     pinMode(button3, INPUT);

@@ -21,7 +21,7 @@ RH_RF69 rf69(RFM69_CS, RFM69_INT);
 //light setup
 int rgbPin = 5;
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(rgbPin, PIXELCOUNT, NEO_RGBW + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELCOUNT, rgbPin, NEO_RGBW + NEO_KHZ800);
 
 //declare functions
 void hsvToRgb(int hue, int rgb[]);
@@ -29,9 +29,11 @@ void writeColor(int rgb);
 void writeSpectrum(int rgb1, int rgb2, int cycleTime);
 void turnOff();
 
-
-
 void setup() {
+    //light setup
+    strip.begin();
+    strip.show();
+
     Serial.begin(115200);
 
     //radio setup
@@ -61,11 +63,6 @@ void setup() {
     rf69.setEncryptionKey(key);
 
     pinMode(LED, OUTPUT);
-
-    //light setup
-    strip.begin();
-    strip.show();
-
 }
 
 void loop() {
@@ -73,10 +70,9 @@ void loop() {
     char temp[20];
     int i, modeInt, color1int, color2int;
 
-    delay(500);
+    // delay(500);
 
     if (rf69.available()) {
-        Serial.println("AAA");
         uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
         uint8_t len = sizeof(buf);
         if (rf69.recv(buf, &len)) {
@@ -109,21 +105,27 @@ void loop() {
             color2int = color2.toInt();
             Serial.print(modeInt); Serial.print(", "); Serial.print(color1int); Serial.print(", "); Serial.println(color2int);
 
-            if(modeInt == 1){
-                writeColor(color1int);
-            }
-            else if(modeInt == 2){
-                writeSpectrum(color1int, color2int, CYCLETIME);
-            }
-            // digitalWrite(13, HIGH);
+
+            digitalWrite(13, HIGH);
         }
         else {
           Serial.println("Receive failed");
         }
     }
     else {
-       // digitalWrite(13, LOW);
+       digitalWrite(13, LOW);
        Serial.println("no signal");
+    }
+
+    //write to lights
+    if(modeInt == 0){
+        turnOff();
+    }
+    else if(modeInt == 1){
+        writeColor(color1int);
+    }
+    else if(modeInt == 2){
+        writeSpectrum(color1int, color2int, CYCLETIME);
     }
 }
 
@@ -189,13 +191,13 @@ void writeColor(int hue){
     hsvToRgb(hue, rgb);  //now use rgb array for assigning the colors
 
     for(int pixel = 0; pixel<PIXELCOUNT; pixel++){
-        strip.setPixelColor(pixel, rgb[0], rgb[1], rgb[2], 255);
+        strip.setPixelColor(pixel, strip.Color(rgb[0], rgb[1], rgb[2]));
     }
     strip.show();
     // delay(1000);
 
-    //write a single color to the leds
-    //short delay
+    // write a single color to the leds
+    // short delay
     // for(int i = 0; i<3; i++){
     //     Serial.print(rgb[i]);
     //     if(i!=2) Serial.print(", ");
@@ -249,7 +251,7 @@ void writeSpectrum(int hue1, int hue2, int cycleTime){
 
 void turnOff(){
     for(int pixel = 0; pixel<PIXELCOUNT; pixel++){
-        strip.setPixelColor(pixel, 0, 0, 0, 255);
+        strip.setPixelColor(pixel, 0, 0, 0);
     }
     strip.show();
 }
