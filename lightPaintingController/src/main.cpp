@@ -19,6 +19,7 @@ int switch1 = 5;
 
 void singleColor(int color);
 void twoColorSpectrum(int color1, int color2);
+void turnOff();
 
 void setup() {
     pinMode(LED, OUTPUT);
@@ -93,6 +94,10 @@ void loop() {
             buttonState4 = false;
         }
     }
+
+    else{
+        turnOff();
+    }
 }
 
 void singleColor(int color){
@@ -134,6 +139,26 @@ void twoColorSpectrum(int color1, int color2){
 
     itoa((int) color2, temp, 10);
     tempWord += temp;
+    tempWord += "* ";
+    tempWord.toCharArray(radiopacket, 20);
+
+    Serial.println(radiopacket);
+
+    rf69.send((uint8_t *)radiopacket, strlen(radiopacket));
+    rf69.waitPacketSent();
+}
+
+void turnOff(){
+    char radiopacket[20];
+    char temp[5];
+    String tempWord = "";
+    int mode = 1;
+
+    itoa((int) 0, temp, 10);
+    tempWord += temp;
+    tempWord += "* ";
+
+    tempWord += "* ";
     tempWord += "* ";
     tempWord.toCharArray(radiopacket, 20);
 

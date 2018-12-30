@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <RH_RF69.h>
+#include <math.h>
 
 #define RF69_FREQ 900.0
 
@@ -11,9 +12,10 @@
 
 RH_RF69 rf69(RFM69_CS, RFM69_INT);
 
-int hsvToRgb(int hue);
+void hsvToRgb(int hue, int rgb[]);
 void writeColor(int rgb);
 void writeSpectrum(int rgb1, int rgb2, int cycleTime);
+void turnOff();
 
 #define CYCLETIME 2000
 
@@ -53,7 +55,7 @@ void loop() {
     char temp[20];
     int i, modeInt, color1int, color2int;
 
-    // delay(500);
+    delay(500);
 
     if (rf69.available()) {
         uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
@@ -89,34 +91,111 @@ void loop() {
             Serial.print(modeInt); Serial.print(", "); Serial.print(color1int); Serial.print(", "); Serial.println(color2int);
 
             if(modeInt == 1){
-                writeColor(hsvToRgb(color1int));
+                writeColor(color1int);
             }
             else if(modeInt == 2){
-                writeSpectrum(hsvToRgb(color1int), hsvToRgb(color2int), CYCLETIME);
+                writeSpectrum(color1int, color2int, CYCLETIME);
             }
-            digitalWrite(13, HIGH);
+            // digitalWrite(13, HIGH);
         }
         else {
           Serial.println("Receive failed");
         }
     }
     else {
-       digitalWrite(13, LOW);
+       // digitalWrite(13, LOW);
        Serial.println("no signal");
     }
 }
 
-int hsvToRgb(int hue){
-    return hue;  //converts the hue in hsv format to an array of rgb format
+void hsvToRgb(int hue, int rgb[]){
+
+    double chroma = 1;  //saturation * value, since I assume these are both 1, chroma is 1
+    double huePrime = hue/60;
+    double X = chroma * (1-abs(fmod(huePrime, 2.0) - 1));
+
+    int roundedHuePrime = floor(huePrime+0.5);
+    int chromaInt = 255*round(chroma);
+    int XInt = 255*floor(X+0.5);
+
+    switch(roundedHuePrime){
+        case 0:
+            rgb[0] = chromaInt;
+            rgb[1] = XInt;
+            rgb[2] = 0;
+            break;
+        case 1:
+            rgb[0] = chromaInt;
+            rgb[1] = XInt;
+            rgb[2] = 0;
+            break;
+        case 2:
+            rgb[0] = XInt;
+            rgb[1] = chromaInt;
+            rgb[2] = 0;
+            break;
+        case 3:
+            rgb[0] = 0;
+            rgb[1] = chromaInt;
+            rgb[2] = XInt;
+            break;
+        case 4:
+            rgb[0] = 0;
+            rgb[1] = XInt;
+            rgb[2] = chromaInt;
+            break;
+        case 5:
+            rgb[0] = XInt;
+            rgb[1] = 0;
+            rgb[2] = chromaInt;
+            break;
+        case 6:
+            rgb[0] = chromaInt;
+            rgb[1] = 0;
+            rgb[2] = XInt;
+            break;
+        default:
+            //do nothing
+            break;
+
+    //don't have to add m because V-C is 0
+    //https://en.wikipedia.org/wiki/HSL_and_HSV, see convert from HSV section
+    }
+
+    //converts the hue in hsv format to an array of rgb format
 }
 
-void writeColor(int rgb){
+void writeColor(int hue){
+    int rgb[3];
+    hsvToRgb(hue, rgb);  //now use rgb array for assigning the colors
+    
     //write a single color to the leds
     //short delay
-    Serial.println(rgb);
+    // for(int i = 0; i<3; i++){
+    //     Serial.print(rgb[i]);
+    //     if(i!=2) Serial.print(", ");
+    // }
+    // Serial.println();
 }
 
-void writeSpectrum(int rgb1, int rgb2, int cycleTime){
+void writeSpectrum(int hue1, int hue2, int cycleTime){
+    int rgb1[3], rgb2[3];
+    hsvToRgb(hue1, rgb1);
+    hsvToRgb(hue2, rgb2);
     //two for loops spectrum cycling, divide delay so the total time = cycleTime
-    Serial.print(rgb1); Serial.print(", "); Serial.println(rgb2);
+
+    // for(int i = 0; i<3; i++){
+    //     Serial.print(rgb1[i]);
+    //     if(i!=2) Serial.print(", ");
+    // }
+    // Serial.println();
+    // for(int i = 0; i<3; i++){
+    //     Serial.print(rgb2[i]);
+    //     if(i!=2) Serial.print(", ");
+    // }
+    // Serial.println();
+}
+
+void turnOff(){
+
 }
