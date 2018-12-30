@@ -2,7 +2,13 @@
 #include <SPI.h>
 #include <RH_RF69.h>
 #include <math.h>
+#include <Adafruit_NeoPixel.h>
 
+//globals
+#define CYCLETIME 2000
+#define PIXELCOUNT 3
+
+//radio setup
 #define RF69_FREQ 900.0
 
   #define RFM69_CS      8
@@ -12,16 +18,23 @@
 
 RH_RF69 rf69(RFM69_CS, RFM69_INT);
 
+//light setup
+int rgbPin = 5;
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(rgbPin, PIXELCOUNT, NEO_RGBW + NEO_KHZ800);
+
+//declare functions
 void hsvToRgb(int hue, int rgb[]);
 void writeColor(int rgb);
 void writeSpectrum(int rgb1, int rgb2, int cycleTime);
 void turnOff();
 
-#define CYCLETIME 2000
+
 
 void setup() {
     Serial.begin(115200);
 
+    //radio setup
     Serial.println("starting");
 
     pinMode(LED, OUTPUT);
@@ -40,7 +53,7 @@ void setup() {
     }
     Serial.println("RFM69 radio init OK!");
     if (!rf69.setFrequency(RF69_FREQ)) {
-      //Serial.println("setFrequency failed");
+      Serial.println("setFrequency failed");
     }
     rf69.setTxPower(20, true);  // range from 14-20 for power, 2nd arg must be true for 69HCW
     uint8_t key[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -48,6 +61,11 @@ void setup() {
     rf69.setEncryptionKey(key);
 
     pinMode(LED, OUTPUT);
+
+    //light setup
+    strip.begin();
+    strip.show();
+
 }
 
 void loop() {
@@ -58,6 +76,7 @@ void loop() {
     delay(500);
 
     if (rf69.available()) {
+        Serial.println("AAA");
         uint8_t buf[RH_RF69_MAX_MESSAGE_LEN];
         uint8_t len = sizeof(buf);
         if (rf69.recv(buf, &len)) {
@@ -168,7 +187,13 @@ void hsvToRgb(int hue, int rgb[]){
 void writeColor(int hue){
     int rgb[3];
     hsvToRgb(hue, rgb);  //now use rgb array for assigning the colors
-    
+
+    for(int pixel = 0; pixel<PIXELCOUNT; pixel++){
+        strip.setPixelColor(pixel, rgb[0], rgb[1], rgb[2], 255);
+    }
+    strip.show();
+    // delay(1000);
+
     //write a single color to the leds
     //short delay
     // for(int i = 0; i<3; i++){
@@ -179,10 +204,36 @@ void writeColor(int hue){
 }
 
 void writeSpectrum(int hue1, int hue2, int cycleTime){
+    int scaler[3];
     int rgb1[3], rgb2[3];
     hsvToRgb(hue1, rgb1);
     hsvToRgb(hue2, rgb2);
     //two for loops spectrum cycling, divide delay so the total time = cycleTime
+
+    for(int j=0; j<256; j++){
+        for(int pixel = 0; pixel < PIXELCOUNT; pixel++){
+            for(int n = 0; n<3; n++){
+                if(rgb1[n]-rgb2[n] != 0) scaler[n] = 255/(rgb1[n]-rgb2[n]);
+                else scaler[n] = 0;
+            }
+            strip.setPixelColor(pixel, rgb1[0] + scaler[0]*j, rgb1[1] + scaler[1]*j, rgb1[2] + scaler[2]*j);  //replace 0, 0, 255 with rgb1
+        }
+        strip.show();
+        delay(cycleTime/(2*255));
+    }
+    delay(cycleTime/4);
+    for(int j=0; j<256; j++){
+        for(int pixel = 0; pixel < PIXELCOUNT; pixel++){
+            for(int n = 0; n<3; n++){
+                if(rgb2[n]-rgb1[n] != 0) scaler[n] = 255/(rgb2[n]-rgb1[n]);
+                else scaler[n] = 0;
+            }
+            strip.setPixelColor(pixel, rgb2[0] + scaler[0]*j, rgb2[1] + scaler[1]*j, rgb2[2] + scaler[2]*j);  //replace 0, 0, 255 with rgb1
+        }
+        strip.show();
+        delay(cycleTime/(2*255));
+    }
+    delay(cycleTime/4);
 
     // for(int i = 0; i<3; i++){
     //     Serial.print(rgb1[i]);
@@ -197,5 +248,8 @@ void writeSpectrum(int hue1, int hue2, int cycleTime){
 }
 
 void turnOff(){
-
+    for(int pixel = 0; pixel<PIXELCOUNT; pixel++){
+        strip.setPixelColor(pixel, 0, 0, 0, 255);
+    }
+    strip.show();
 }
