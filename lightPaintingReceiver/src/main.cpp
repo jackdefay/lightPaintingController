@@ -68,7 +68,9 @@ void setup() {
 void loop() {
     String word, mode, color1, color2;
     char temp[20];
-    int i, modeInt, color1int, color2int;
+    int i;
+    static int color1int, color2int;
+    static int modeInt;
 
     // delay(500);
 
@@ -118,14 +120,18 @@ void loop() {
     }
 
     //write to lights
+    Serial.print("ModeInt = "); Serial.println(modeInt);
     if(modeInt == 0){
         turnOff();
+        Serial.println("Mode 0");
     }
     else if(modeInt == 1){
         writeColor(color1int);
+        Serial.println("Mode 1");
     }
     else if(modeInt == 2){
         writeSpectrum(color1int, color2int, CYCLETIME);
+        Serial.println("Mode 2");
     }
 }
 
