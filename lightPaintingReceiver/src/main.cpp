@@ -6,7 +6,7 @@
 
 //globals
 #define CYCLETIME 2000
-#define PIXELCOUNT 3
+#define PIXELCOUNT 12
 
 //radio setup
 #define RF69_FREQ 900.0
@@ -21,7 +21,7 @@ RH_RF69 rf69(RFM69_CS, RFM69_INT);
 //light setup
 int rgbPin = 5;
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELCOUNT, rgbPin, NEO_RGBW + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELCOUNT, rgbPin);
 
 //declare functions
 void hsvToRgb(int hue, int rgb[]);
@@ -218,7 +218,7 @@ void writeSpectrum(int hue1, int hue2, int cycleTime){
     hsvToRgb(hue2, rgb2);
     //two for loops spectrum cycling, divide delay so the total time = cycleTime
 
-    for(int j=0; j<256; j++){
+    for(int j=1; j<256; j++){
         for(int pixel = 0; pixel < PIXELCOUNT; pixel++){
             for(int n = 0; n<3; n++){
                 if(rgb1[n]-rgb2[n] != 0) scaler[n] = 255/(rgb1[n]-rgb2[n]);
@@ -230,7 +230,7 @@ void writeSpectrum(int hue1, int hue2, int cycleTime){
         delay(cycleTime/(2*255));
     }
     delay(cycleTime/4);
-    for(int j=0; j<256; j++){
+    for(int j=1; j<256; j++){
         for(int pixel = 0; pixel < PIXELCOUNT; pixel++){
             for(int n = 0; n<3; n++){
                 if(rgb2[n]-rgb1[n] != 0) scaler[n] = 255/(rgb2[n]-rgb1[n]);
