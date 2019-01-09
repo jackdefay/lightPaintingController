@@ -17,9 +17,7 @@ int button3 = 10;
 int button4 = 6;
 int switch1 = 5;
 
-void singleColor(int color);
-void twoColorSpectrum(int color1, int color2);
-void turnOff();
+void sendInstructions(int mode, int color1, int color2);
 
 void setup() {
     pinMode(LED, OUTPUT);
@@ -64,6 +62,8 @@ void loop() {
     static int numPresses1 = 0;
     static int color = 0;
 
+    // delay(500);
+
     if(digitalRead(switch1) == HIGH){
 
         if(digitalRead(button1) == HIGH){
@@ -80,87 +80,59 @@ void loop() {
         }
 
         if(buttonState1 == true && digitalRead(button1) == LOW){
-            singleColor(120);  //hsv green
+            numPresses1+=1;
+            if(numPresses1 > 6){
+                numPresses1 = 1;
+            }
+
+            if(numPresses1 == 1) color = 120;  //hsv green
+            else if(numPresses1 == 2) color = 60;  //hsv yellow
+            else if(numPresses1 == 3) color = 240;  //hsv blue
+            else if(numPresses1 == 4) color = 0;  //hsv red
+            else if(numPresses1 == 5) color = 300;  //hsv pink/purple
+            else if(numPresses1 == 6) color = 180;  //hsv aqua
+
+            sendInstructions(1, color, -1);
             buttonState1 = false;
         }
         if(buttonState2 == true && digitalRead(button2) == LOW){
-            singleColor(60);  //hsv yellow
+            sendInstructions(2, 0, 240);  //hsv red blue
             buttonState2 = false;
         }
         if(buttonState3 == true && digitalRead(button3) == LOW){
-            twoColorSpectrum(0, 240);  //hsv red blue
+            sendInstructions(2, 120, 240); //hsv green blue
             buttonState3 = false;
         }
         if(buttonState4 == true && digitalRead(button4) == LOW){
-            twoColorSpectrum(120, 240);  //hsv green blue
+            sendInstructions(3, 240, 60); //hsv blue yellow
             buttonState4 = false;
         }
     }
 
     else{
-        turnOff();
+        sendInstructions(0, -1, -1);
     }
 }
 
-void singleColor(int color){
+void sendInstructions(int mode, int color1, int color2){
     char radiopacket[20];
     char temp[5];
     String tempWord = "";
-    int mode = 1;
-
-    itoa((int) mode, temp, 10);
-    tempWord += temp;
-    tempWord += "* ";
-
-    itoa((int) color, temp, 10);
-    tempWord += temp;
-    tempWord += "* ";
-
-    tempWord += "* ";
-    tempWord.toCharArray(radiopacket, 20);
-
-    Serial.println(radiopacket);
-
-    rf69.send((uint8_t *)radiopacket, strlen(radiopacket));
-    rf69.waitPacketSent();
-}
-
-void twoColorSpectrum(int color1, int color2){
-    char radiopacket[20];
-    char temp[5];
-    String tempWord = "";
-    int mode = 2;
 
     itoa((int) mode, temp, 10);
     tempWord = temp;
     tempWord += "* ";
 
-    itoa((int) color1, temp, 10);
-    tempWord += temp;
+    if(color1 >= 0){
+        itoa((int) color1, temp, 10);
+        tempWord += temp;
+    }
     tempWord += "* ";
 
-    itoa((int) color2, temp, 10);
-    tempWord += temp;
-    tempWord += "* ";
-    tempWord.toCharArray(radiopacket, 20);
-
-    Serial.println(radiopacket);
-
-    rf69.send((uint8_t *)radiopacket, strlen(radiopacket));
-    rf69.waitPacketSent();
-}
-
-void turnOff(){
-    char radiopacket[20];
-    char temp[5];
-    String tempWord = "";
-    int mode = 1;
-
-    itoa((int) 0, temp, 10);
-    tempWord += temp;
-    tempWord += "* ";
-
-    tempWord += "* ";
+    if(color2 >= 0){
+        itoa((int) color2, temp, 10);
+        tempWord += temp;
+    }
     tempWord += "* ";
     tempWord.toCharArray(radiopacket, 20);
 

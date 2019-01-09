@@ -28,6 +28,7 @@ void hsvToRgb(int hue, int rgb[]);
 void writeColor(int rgb);
 void writeSpectrum(int rgb1, int rgb2, int cycleTime);
 void turnOff();
+void solidColorBlinkAnother(int hue1, int hue2, int longDelay, int shortDelay);
 
 void setup() {
     //light setup
@@ -132,6 +133,10 @@ void loop() {
     else if(modeInt == 2){
         writeSpectrum(color1int, color2int, CYCLETIME);
         Serial.println("Mode 2");
+    }
+    else if(modeInt == 3){
+        solidColorBlinkAnother(color1int, color2int, CYCLETIME, 50);
+        Serial.println("Mode 3");
     }
 }
 
@@ -260,4 +265,31 @@ void turnOff(){
         strip.setPixelColor(pixel, 0, 0, 0);
     }
     strip.show();
+}
+
+void solidColorBlinkAnother(int hue1, int hue2, int longDelay, int shortDelay){
+    int rgb1[3], rgb2[3];
+    hsvToRgb(hue1, rgb1);
+    hsvToRgb(hue2, rgb2);
+
+    //first color
+    for(int pixel = 0; pixel<PIXELCOUNT; pixel++){
+        strip.setPixelColor(pixel, strip.Color(rgb1[0], rgb1[1], rgb1[2]));
+    }
+    strip.show();
+    delay((longDelay-shortDelay)/2);
+
+    //second color
+    for(int pixel = 0; pixel<PIXELCOUNT; pixel++){
+        strip.setPixelColor(pixel, strip.Color(rgb2[0], rgb2[1], rgb2[2]));
+    }
+    strip.show();
+    delay(shortDelay);
+
+    //back to the first color
+    for(int pixel = 0; pixel<PIXELCOUNT; pixel++){
+        strip.setPixelColor(pixel, strip.Color(rgb1[0], rgb1[1], rgb1[2]));
+    }
+    strip.show();
+    delay((longDelay-shortDelay)/2);
 }
