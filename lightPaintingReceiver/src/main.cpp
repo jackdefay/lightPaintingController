@@ -135,8 +135,12 @@ void loop() {
         Serial.println("Mode 2");
     }
     else if(modeInt == 3){
-        solidColorBlinkAnother(color1int, color2int, CYCLETIME, 50);
+        solidColorBlinkAnother(color1int, color2int, CYCLETIME, 150);
         Serial.println("Mode 3");
+    }
+    else if(modeInt == 4){
+        writeSpectrum(color1int, color2int, 4*CYCLETIME);
+        Serial.println("Mode 4");
     }
 }
 

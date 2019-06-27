@@ -60,7 +60,10 @@ void loop() {
     static bool buttonState3 = false;
     static bool buttonState4 = false;
     static int numPresses1 = 0;
+    static int numPresses2 = 0;
     static int color = 0;
+    static int color1 = 0;
+    static int color2 = 0;
 
     // delay(500);
 
@@ -96,15 +99,41 @@ void loop() {
             buttonState1 = false;
         }
         if(buttonState2 == true && digitalRead(button2) == LOW){
-            sendInstructions(2, 0, 240);  //hsv red blue
+            numPresses2+=1;
+            if(numPresses2 > 5){
+                numPresses2 = 1;
+            }
+
+            if(numPresses2 == 1){
+                color1 = 0;  //hsv red
+                color2 = 240;  //hsv blue
+            }
+            else if(numPresses2 == 2) {
+                color1 = 120;  //hsv green
+                color2 = 240;  //hsv blue
+            }
+            else if(numPresses2 == 3) {
+                color1 = 300;  //hsv pink
+                color2 = 60;  //hsv yellow
+            }
+            else if(numPresses2 == 4) {
+                color1 = 60;  //hsv yellow
+                color2 = 120;  //hsv green
+            }
+            else if(numPresses2 == 5) {
+                color1 = 0;  //hsv red
+                color2 = 60;  //hsv yellow
+            }
+
+            sendInstructions(2, color1, color2);
             buttonState2 = false;
         }
         if(buttonState3 == true && digitalRead(button3) == LOW){
-            sendInstructions(2, 120, 240); //hsv green blue
+            sendInstructions(4, 0, 240); //hsv green blue
             buttonState3 = false;
         }
         if(buttonState4 == true && digitalRead(button4) == LOW){
-            sendInstructions(3, 240, 60); //hsv blue yellow
+            sendInstructions(3, 240, 300); //hsv blue yellow
             buttonState4 = false;
         }
     }
